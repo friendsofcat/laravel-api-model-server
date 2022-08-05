@@ -1,0 +1,28 @@
+{
+    "name": "matta-davi/laravel-api-model-server",
+    "description": "API for Laravel Eloquent",
+    "keywords": [
+        "laravel",
+        "JSON api",
+        "api",
+        "eloquent"
+    ],
+    "type": "library",
+    "require": {
+        "php": "^8.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Matta",
+            "email": "matta.davi@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MattaDavi\\LaravelApiModelServer\\": "src"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
