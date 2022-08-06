@@ -4,7 +4,7 @@ namespace MattaDavi\LaravelApiModelServer\Concerns;
 
 use BadMethodCallException;
 
-trait WorksWithAllowedRestrictedPairs
+trait HasAllowedRestrictedPairs
 {
     public function __call($method, $parameters)
     {
@@ -18,10 +18,9 @@ trait WorksWithAllowedRestrictedPairs
             $propName = substr($method, strlen('getAllowed'));
 
             if (strlen($propName)) {
-
-                return isset($this->{"allowed$propName"}) && isset($this->{"restricted$propName"})
+                return isset($this->{"allowed${propName}"}) && isset($this->{"restricted${propName}"})
                     ? $this->getAllowed($propName)
-                    : throw new BadMethodCallException("Method [$method] does not exist.");
+                    : throw new BadMethodCallException("Method [${method}] does not exist.");
             }
         }
 

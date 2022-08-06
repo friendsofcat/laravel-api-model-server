@@ -4,11 +4,11 @@ namespace MattaDavi\LaravelApiModelServer;
 
 use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
-use MattaDavi\LaravelApiModelServer\Concerns\WorksWithAllowedRestrictedPairs;
+use MattaDavi\LaravelApiModelServer\Concerns\HasAllowedRestrictedPairs;
 
 abstract class ApiModelSchema
 {
-    use WorksWithAllowedRestrictedPairs;
+    use HasAllowedRestrictedPairs;
 
     protected string $model;
 
