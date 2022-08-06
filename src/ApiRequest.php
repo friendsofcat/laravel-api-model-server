@@ -5,6 +5,7 @@ namespace MattaDavi\LaravelApiModelServer;
 use RuntimeException;
 use Illuminate\Foundation\Http\FormRequest;
 use MattaDavi\LaravelApiModelServer\Rules\SortRule;
+use MattaDavi\LaravelApiModelServer\Rules\QueryTypeRule;
 
 abstract class ApiRequest extends FormRequest
 {
@@ -17,17 +18,17 @@ abstract class ApiRequest extends FormRequest
      * Api model schema object resolved from $schema.
      * Holds necessary info for validation.
      */
-    protected ApiModelSchema $schemaObject;
+    private ApiModelSchema $schemaObject;
 
     public function __construct()
     {
-        $this->schemaObject = $this->getSchema();
+        $this->setSchemaObject();
     }
 
     /*
      * Resolve Api model schema object from provided full class name.
      */
-    protected function getSchema()
+    private function setSchemaObject()
     {
         if (! class_exists($this->schema)) {
             throw new RuntimeException('Defined schema does not exist!');
@@ -36,10 +37,15 @@ abstract class ApiRequest extends FormRequest
         $schema = app($this->schema);
 
         if (! $schema instanceof ApiModelSchema) {
-            throw new RuntimeException('Schema should be instance of MattaDavi\LaravelApiModelServer\ApiModelSchema');
+            throw new RuntimeException('Schema must be instance of MattaDavi\LaravelApiModelServer\ApiModelSchema');
         }
 
-        return $schema;
+        $this->schemaObject = $schema;
+    }
+
+    public function getSchema(): ApiModelSchema
+    {
+        return $this->schemaObject;
     }
 
     public function rules(): array
@@ -47,12 +53,14 @@ abstract class ApiRequest extends FormRequest
         return [
             //            'filter' => '',
             'sort' => [
-                new SortRule($this->schemaObject),
+                new SortRule($this->getSchema()),
             ],
             'page' => ['numeric', 'integer'],
             'per_page' => ['numeric', 'integer'],
             //            'nested' => '',
-            //            'queryType' => '',
+            'queryType' => [
+                new QueryTypeRule($this->getSchema()),
+            ],
             //            'fields' => '',
             //            'selectRaw' => '',
             'limit' => ['numeric', 'integer'],

@@ -3,22 +3,9 @@
 namespace MattaDavi\LaravelApiModelServer\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use MattaDavi\LaravelApiModelServer\ApiModelSchema;
 
-class SortRule implements Rule
+class SortRule extends BaseSchemaRule implements Rule
 {
-    public string $currentValue;
-
-    public array|string $allowedAttributes;
-
-    public string $arrayValueSeparator = ',';
-
-    public function __construct(public ApiModelSchema $schema)
-    {
-        $this->allowedAttributes = $schema->getAllowedAttributes();
-        $this->arrayValueSeparator = $schema::ARRAY_VALUE_SEPARATOR;
-    }
-
     /**
      * Determine if the validation rule passes.
      *
@@ -28,26 +15,18 @@ class SortRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($this->allowedAttributes === 'all') {
+        $allowedAttributes = $this->schema->getAllowedAttributes();
+
+        if ($this->shouldAllowEverything($allowedAttributes)) {
             return true;
         }
 
-        $values = explode($this->arrayValueSeparator, $value);
+        $values = array_map(
+            fn ($value) => $value['value'],
+            $this->schema->parseSortValues($value)
+        );
 
-        foreach ($values as $value) {
-            $formattedValue = ltrim($value, '-');
-            $this->currentValue = $formattedValue;
-
-            if ($this->allowedAttributes['mode'] === 'restricted'
-                && in_array($formattedValue, $this->allowedAttributes['values'])) {
-                return false;
-            } elseif ($this->allowedAttributes['mode'] === 'allowed'
-                && ! in_array($formattedValue, $this->allowedAttributes['values'])) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->isEverythingAllowed($values, $allowedAttributes);
     }
 
     /**
@@ -57,6 +36,6 @@ class SortRule implements Rule
      */
     public function message()
     {
-        return sprintf('Cannot order by restricted attribute: %s', $this->currentValue);
+        return sprintf('Cannot order by restricted attribute: %s', $this->errorValue);
     }
 }

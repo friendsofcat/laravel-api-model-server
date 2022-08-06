@@ -4,9 +4,12 @@ namespace MattaDavi\LaravelApiModelServer;
 
 use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
+use MattaDavi\LaravelApiModelServer\Concerns\WorksWithAllowedRestrictedPairs;
 
 abstract class ApiModelSchema
 {
+    use WorksWithAllowedRestrictedPairs;
+
     protected string $model;
 
     /*
@@ -126,46 +129,42 @@ abstract class ApiModelSchema
         $model = app($this->model);
 
         if (! $model instanceof Model) {
-            throw new RuntimeException('Model should be instance of Illuminate\Database\Eloquent\Model');
+            throw new RuntimeException('Model must be instance of Illuminate\Database\Eloquent\Model');
         }
 
         return $model;
     }
 
-    protected function getAllowed($propName): string|array
+    public function parseValues(string $values): string|array
     {
-        $formattedPropName = \Str::ucfirst($propName);
+        return explode(self::ARRAY_VALUE_SEPARATOR, $values);
+    }
 
-        [$allowed, $restricted] = [
-            $this->{"allowed${formattedPropName}"},
-            $this->{"restricted${formattedPropName}"},
+    public function parseSortValues(string $values): array
+    {
+        return array_map(
+            function ($value) {
+                $trimmedValue = ltrim($value, '-');
+                $direction = str_starts_with($value, '-')
+                    ? 'desc'
+                    : 'asc';
+
+                return [
+                    'value' => $trimmedValue,
+                    'direction' => $direction
+                ];
+            },
+            $this->parseValues($values)
+        );
+    }
+
+    public function parseQueryTypeValues(string $values): array
+    {
+        $values = $this->parseValues($values);
+
+        return [
+            'method' => $values[0],
+            'args' => array_slice($values, 1)
         ];
-
-        return match (true) {
-            ($allowed === 'all' || empty($allowed)) && ! empty($restricted) => [
-                'values' => $restricted,
-                'mode' => 'restricted',
-            ],
-            $allowed !== 'all' => [
-                'values' => $allowed,
-                'mode' => 'allowed',
-            ],
-            default => $allowed
-        };
-    }
-
-    public function getAllowedAttributes(): string|array
-    {
-        return $this->getAllowed('attributes');
-    }
-
-    public function getAllowedMethods(): string|array
-    {
-        return $this->getAllowed('methods');
-    }
-
-    public function getAllowedScopes(): string|array
-    {
-        return $this->getAllowed('scopes');
     }
 }
