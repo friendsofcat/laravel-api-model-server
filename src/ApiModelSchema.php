@@ -126,8 +126,6 @@ abstract class ApiModelSchema
 
     public const ARRAY_VALUE_SEPARATOR = ',';
 
-    public const ARRAY_KEY_SEPARATOR = ':';
-
     public const NESTED_METHODS = [
         'e' => 'exists',
         'ne' => 'notExists',
@@ -216,6 +214,9 @@ abstract class ApiModelSchema
         );
     }
 
+    /*
+     * Parse relations for eager loading.
+     */
     public function parseIncludeValues(string $values): array
     {
         $formattedEagerLoad = explode(':', $values);
@@ -239,6 +240,20 @@ abstract class ApiModelSchema
         );
     }
 
+    /*
+     * Resolve ordered nested logic used to properly construct desired query.
+     *
+     *
+     * Example client request => 'and,0:and:e,0:or,1:and,4:and,4:or'
+     * --------------
+     * [0:and:e] => [parent:boolean:method]
+     * 0    => index of parent nesting (determined from order in request)
+     * and  => logic of nesting: where(...) / orWhere(...)
+     * e    => nullable method of nesting. Configurable via NESTED_METHODS constant.
+     *         Default settings:
+     *         e: whereExists(...) / orWhereExists(...),
+     *         ne: whereNotExists(...) / orWhereNotExists(...),
+     */
     public function parseNestedParts(string $values): array
     {
         $parts = explode(':', $values);
@@ -271,6 +286,21 @@ abstract class ApiModelSchema
         return $formattedParts;
     }
 
+    /*
+     * Resolve desired method to execute query.
+     * You can set possible values via $allowedMethods.
+     * Defaults to 'get()'.
+     *
+     *
+     * 1. Example request from client => 'count'
+     * --------------
+     * Method to execute => count()
+     *
+     *
+     * 2. Example request from client => 'avg:price'
+     * --------------
+     * Method to execute => avg('price')
+     */
     public function parseQueryTypeValues(string $values): array
     {
         $values = $this->parseValues($values);
@@ -299,11 +329,31 @@ abstract class ApiModelSchema
         ];
     }
 
+    /*
+     * We need to take server defined aliases into consideration
+     * while resolving allowed attributes.
+     */
     public function resolveFieldValue(string $value): string
     {
         return $this->attributeAliases[$value] ?? $value;
     }
 
+    /*
+     * We need to respect client defined alias while resolving allowed attribute,
+     * even when it is resolved via server defined alias.
+     *
+     *
+     * 1. Example request from client: 'id as account'
+     * --------------
+     * Server settings: $attributeAliases = ['id' => 'iban']
+     * Value to use in query => 'iban as account'
+     *
+     *
+     * 2. Example request from client: 'id'
+     * --------------
+     * Server settings: $attributeAliases = ['id' => 'iban']
+     * Value to use in query => 'iban as id'
+     */
     public function resolveFieldAliasValue(array $field): string
     {
         $alias = null;

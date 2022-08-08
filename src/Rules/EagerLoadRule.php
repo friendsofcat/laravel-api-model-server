@@ -56,6 +56,10 @@ class EagerLoadRule extends BaseSchemaRule implements Rule
             return false;
         }
 
+        if (empty($allowedValues[$relation])) {
+            return true;
+        }
+
         foreach ($columns as $column) {
             if (! in_array($column, $allowedValues[$relation])) {
                 return false;
