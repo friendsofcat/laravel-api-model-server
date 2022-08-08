@@ -1,7 +1,7 @@
 <?php
 
 namespace MattaDavi\LaravelApiModelServer\Rules;
-use Illuminate\Support\Facades\Log;
+
 use Illuminate\Contracts\Validation\Rule;
 
 class NestedRule extends BaseSchemaRule implements Rule
@@ -40,7 +40,7 @@ class NestedRule extends BaseSchemaRule implements Rule
     {
         $parent = $nesting['parts']['parent'];
 
-        return is_null($parent) || (is_numeric($parent) && isset($nestings[(int)$parent]));
+        return is_null($parent) || (is_numeric($parent) && isset($nestings[(int) $parent]));
     }
 
     public function hasValidBoolean($nesting): bool

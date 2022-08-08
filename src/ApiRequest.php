@@ -5,12 +5,12 @@ namespace MattaDavi\LaravelApiModelServer;
 use RuntimeException;
 use Illuminate\Foundation\Http\FormRequest;
 use MattaDavi\LaravelApiModelServer\Rules\SortRule;
-use MattaDavi\LaravelApiModelServer\Rules\NestedRule;
 use MattaDavi\LaravelApiModelServer\Rules\FieldsRule;
+use MattaDavi\LaravelApiModelServer\Rules\NestedRule;
 use MattaDavi\LaravelApiModelServer\Rules\GroupByRule;
+use MattaDavi\LaravelApiModelServer\Rules\EagerLoadRule;
 use MattaDavi\LaravelApiModelServer\Rules\QueryTypeRule;
 use MattaDavi\LaravelApiModelServer\Rules\SelectRawRule;
-use MattaDavi\LaravelApiModelServer\Rules\EagerLoadRule;
 
 abstract class ApiRequest extends FormRequest
 {

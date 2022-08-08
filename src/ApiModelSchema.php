@@ -130,7 +130,7 @@ abstract class ApiModelSchema
 
     public const NESTED_METHODS = [
         'e' => 'exists',
-        'ne' => 'notExists'
+        'ne' => 'notExists',
     ];
 
     public function getAllowedRawClauses(): string|array
@@ -150,6 +150,7 @@ abstract class ApiModelSchema
         }
 
         $formattedEagerLoads = [];
+
         foreach ($this->allowedEagerLoads as $eagerLoad) {
             $formattedEagerLoads = array_merge($formattedEagerLoads, $this->parseIncludeValues($eagerLoad));
         }
@@ -208,7 +209,7 @@ abstract class ApiModelSchema
 
                 return [
                     'value' => $this->resolveFieldValue($trimmedValue),
-                    'direction' => $direction
+                    'direction' => $direction,
                 ];
             },
             $this->parseValues($values)
@@ -276,7 +277,7 @@ abstract class ApiModelSchema
 
         return [
             'method' => $values[0],
-            'args' => array_slice($values, 1)
+            'args' => array_slice($values, 1),
         ];
     }
 
@@ -288,7 +289,7 @@ abstract class ApiModelSchema
         );
     }
 
-    public function parseFieldValue($value)
+    public function parseFieldValue(string $value): array
     {
         $formattedField = explode(' as ', $value);
 
@@ -298,12 +299,12 @@ abstract class ApiModelSchema
         ];
     }
 
-    public function resolveFieldValue($value)
+    public function resolveFieldValue(string $value): string
     {
         return $this->attributeAliases[$value] ?? $value;
     }
 
-    public function resolveFieldAliasValue($field)
+    public function resolveFieldAliasValue(array $field): string
     {
         $alias = null;
 
