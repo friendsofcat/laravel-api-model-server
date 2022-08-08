@@ -5,7 +5,12 @@ namespace MattaDavi\LaravelApiModelServer;
 use RuntimeException;
 use Illuminate\Foundation\Http\FormRequest;
 use MattaDavi\LaravelApiModelServer\Rules\SortRule;
+use MattaDavi\LaravelApiModelServer\Rules\NestedRule;
+use MattaDavi\LaravelApiModelServer\Rules\FieldsRule;
+use MattaDavi\LaravelApiModelServer\Rules\GroupByRule;
 use MattaDavi\LaravelApiModelServer\Rules\QueryTypeRule;
+use MattaDavi\LaravelApiModelServer\Rules\SelectRawRule;
+use MattaDavi\LaravelApiModelServer\Rules\EagerLoadRule;
 
 abstract class ApiRequest extends FormRequest
 {
@@ -57,15 +62,26 @@ abstract class ApiRequest extends FormRequest
             ],
             'page' => ['numeric', 'integer'],
             'per_page' => ['numeric', 'integer'],
-            //            'nested' => '',
+            'nested' => [
+                new NestedRule($this->getSchema()),
+            ],
             'queryType' => [
                 new QueryTypeRule($this->getSchema()),
             ],
-            //            'fields' => '',
-            //            'selectRaw' => '',
+            'fields' => [
+                new FieldsRule($this->getSchema()),
+            ],
+            'include' => [
+                new EagerLoadRule($this->getSchema()),
+            ],
+            'selectRaw' => [
+                new SelectRawRule($this->getSchema()),
+            ],
             'limit' => ['numeric', 'integer'],
             'offset' => ['numeric', 'integer'],
-            //            'groupBy' => '',
+            'groupBy' => [
+                new GroupByRule($this->getSchema()),
+            ],
             //            'compressed' => '',
         ];
     }

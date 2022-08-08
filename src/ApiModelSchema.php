@@ -84,6 +84,17 @@ abstract class ApiModelSchema
     protected array $scopeAliases = [];
 
     /*
+     * Define eager loads callable via API.
+     *
+     * Possible values:
+     * string[] => only specified relations.
+     *             Support nested relations and select constrains.
+     *             Example: 'user', 'user.car', 'user:id,created_at'
+     * 'all'    => every method
+     */
+    protected array|string $allowedEagerLoads = [];
+
+    /*
      * Define what methods can be called via API.
      *
      * Possible values:
@@ -117,6 +128,35 @@ abstract class ApiModelSchema
 
     public const ARRAY_KEY_SEPARATOR = ':';
 
+    public const NESTED_METHODS = [
+        'e' => 'exists',
+        'ne' => 'notExists'
+    ];
+
+    public function getAllowedRawClauses(): string|array
+    {
+        return $this->allowedRawClauses;
+    }
+
+    public function getAttributeAliases(): string|array
+    {
+        return $this->attributeAliases;
+    }
+
+    public function getAllowedEagerLoads(): string|array
+    {
+        if ($this->allowedEagerLoads === 'all') {
+            return $this->allowedEagerLoads;
+        }
+
+        $formattedEagerLoads = [];
+        foreach ($this->allowedEagerLoads as $eagerLoad) {
+            $formattedEagerLoads = array_merge($formattedEagerLoads, $this->parseIncludeValues($eagerLoad));
+        }
+
+        return $formattedEagerLoads;
+    }
+
     /*
      * Resolve Model object from provided class name.
      */
@@ -140,6 +180,23 @@ abstract class ApiModelSchema
         return explode(self::ARRAY_VALUE_SEPARATOR, $values);
     }
 
+    public function parseGroupByValues(string $values): string|array
+    {
+        return array_map(
+            function ($value) {
+                $parsedValue = $this->parseFieldValue($value);
+
+                return $parsedValue['alias'] ?? $parsedValue['value'];
+            },
+            $this->parseValues($values)
+        );
+    }
+
+    public function parseSelectRawValues(string $values): string|array
+    {
+        return $this->parseValues($values);
+    }
+
     public function parseSortValues(string $values): array
     {
         return array_map(
@@ -150,12 +207,67 @@ abstract class ApiModelSchema
                     : 'asc';
 
                 return [
-                    'value' => $trimmedValue,
+                    'value' => $this->resolveFieldValue($trimmedValue),
                     'direction' => $direction
                 ];
             },
             $this->parseValues($values)
         );
+    }
+
+    public function parseIncludeValues(string $values): array
+    {
+        $formattedEagerLoad = explode(':', $values);
+        $columns = [];
+
+        if (count($formattedEagerLoad) > 1) {
+            $columns = explode(',', $formattedEagerLoad[1]);
+        }
+
+        return [$formattedEagerLoad[0] => $columns];
+    }
+
+    public function parseNestedValues(string $values): array
+    {
+        return array_map(
+            fn ($nesting) => [
+                'key' => $nesting,
+                'parts' => $this->parseNestedParts($nesting),
+            ],
+            $this->parseValues($values)
+        );
+    }
+
+    public function parseNestedParts(string $values): array
+    {
+        $parts = explode(':', $values);
+        $numOfParts = count($parts);
+
+        $formattedParts = [
+            'parent' => null,
+            'boolean' => null,
+            'method' => null,
+        ];
+
+        if ($numOfParts == 1) {
+            $formattedParts['boolean'] = $parts[0];
+        } elseif ($numOfParts == 2) {
+            if (is_numeric($parts[0])) {
+                $formattedParts['parent'] = $parts[0];
+                $formattedParts['boolean'] = $parts[1];
+            } else {
+                $formattedParts['boolean'] = $parts[0];
+                $formattedParts['method'] = $parts[1];
+            }
+        } else {
+            $formattedParts = [
+                'parent' => $parts[0],
+                'boolean' => $parts[1],
+                'method' => $parts[2],
+            ];
+        }
+
+        return $formattedParts;
     }
 
     public function parseQueryTypeValues(string $values): array
@@ -166,5 +278,39 @@ abstract class ApiModelSchema
             'method' => $values[0],
             'args' => array_slice($values, 1)
         ];
+    }
+
+    public function parseFieldsValues(string $values): array
+    {
+        return array_map(
+            fn ($value) => $this->parseFieldValue($value),
+            $this->parseValues($values)
+        );
+    }
+
+    public function parseFieldValue($value)
+    {
+        $formattedField = explode(' as ', $value);
+
+        return [
+            'value' => $this->resolveFieldValue($formattedField[0]),
+            'alias' => $this->resolveFieldAliasValue($formattedField),
+        ];
+    }
+
+    public function resolveFieldValue($value)
+    {
+        return $this->attributeAliases[$value] ?? $value;
+    }
+
+    public function resolveFieldAliasValue($field)
+    {
+        $alias = null;
+
+        if (isset($this->attributeAliases[$field[0]])) {
+            $alias = $field[0];
+        }
+
+        return $field[1] ?? $alias;
     }
 }

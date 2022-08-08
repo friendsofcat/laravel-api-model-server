@@ -3,8 +3,8 @@
 namespace MattaDavi\LaravelApiModelServer\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-
-class SortRule extends BaseSchemaRule implements Rule
+use Illuminate\Support\Facades\Log;
+class GroupByRule extends BaseSchemaRule implements Rule
 {
     /**
      * Determine if the validation rule passes.
@@ -21,10 +21,7 @@ class SortRule extends BaseSchemaRule implements Rule
             return true;
         }
 
-        $values = array_map(
-            fn ($value) => $value['value'],
-            $this->schema->parseSortValues($value)
-        );
+        $values = $this->schema->parseGroupByValues($value);
 
         foreach ($values as $value) {
             if (! $this->isValidValue($value, $allowedAttributes)) {
@@ -42,11 +39,11 @@ class SortRule extends BaseSchemaRule implements Rule
      */
     public function message()
     {
-        return sprintf('Cannot order by restricted attribute: %s', $this->errorValue);
+        return sprintf('Invalid groupBy attribute: %s', $this->errorValue);
     }
 
     public function isValidValue($value, $allowedValues): bool
     {
-        return in_array($value, $this->schema->getAttributeAliases()) || $this->isAllowed($value, $allowedValues);
+        return isset($this->schema->getAttributeAliases()[$value]) || $this->isAllowed($value, $allowedValues);
     }
 }

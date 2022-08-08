@@ -14,7 +14,7 @@ trait HasAllowedRestrictedPairs
          * Example:
          * $this->getAllowedAttributes()
          */
-        if (\Str::startsWith($method, 'getAllowed')) {
+        if (! method_exists($this, $method) && \Str::startsWith($method, 'getAllowed')) {
             $propName = substr($method, strlen('getAllowed'));
 
             if (strlen($propName)) {
