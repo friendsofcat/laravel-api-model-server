@@ -21,7 +21,7 @@ class GroupByRule extends BaseSchemaRule implements Rule
             return true;
         }
 
-        $values = $this->schema->parseGroupByValues($value);
+        $values = $this->schema->getParser()->parseGroupByValues($value);
 
         foreach ($values as $value) {
             if (! $this->isValidValue($value, $allowedAttributes)) {

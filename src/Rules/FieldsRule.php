@@ -21,7 +21,7 @@ class FieldsRule extends BaseSchemaRule implements Rule
             return true;
         }
 
-        $values = $this->schema->parseFieldsValues($value);
+        $values = $this->schema->getParser()->parseFieldsValues($value);
 
         return $this->isEverythingAllowed($values, $allowedAttributes);
     }

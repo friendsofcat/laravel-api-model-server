@@ -12,6 +12,8 @@ abstract class ApiModelSchema
 
     protected string $model;
 
+    protected string $parser = ApiDataParser::class;
+
     /*
      * Define what attributes would be queryable via API.
      *
@@ -124,8 +126,6 @@ abstract class ApiModelSchema
      */
     protected array $allowedRawClauses = [];
 
-    public const ARRAY_VALUE_SEPARATOR = ',';
-
     public const NESTED_METHODS = [
         'e' => 'exists',
         'ne' => 'notExists',
@@ -150,7 +150,7 @@ abstract class ApiModelSchema
         $formattedEagerLoads = [];
 
         foreach ($this->allowedEagerLoads as $eagerLoad) {
-            $formattedEagerLoads = array_merge($formattedEagerLoads, $this->parseIncludeValues($eagerLoad));
+            $formattedEagerLoads = array_merge($formattedEagerLoads, $this->getParser()->parseIncludeValues($eagerLoad));
         }
 
         return $formattedEagerLoads;
@@ -161,7 +161,7 @@ abstract class ApiModelSchema
      */
     public function getModel()
     {
-        if (class_exists($this->model)) {
+        if (! class_exists($this->model)) {
             throw new RuntimeException('Defined model for this schema does not exist!');
         }
 
@@ -174,194 +174,21 @@ abstract class ApiModelSchema
         return $model;
     }
 
-    public function parseValues(string $values): string|array
-    {
-        return explode(self::ARRAY_VALUE_SEPARATOR, $values);
-    }
-
-    public function parseGroupByValues(string $values): string|array
-    {
-        return array_map(
-            function ($value) {
-                $parsedValue = $this->parseFieldValue($value);
-
-                return $parsedValue['alias'] ?? $parsedValue['value'];
-            },
-            $this->parseValues($values)
-        );
-    }
-
-    public function parseSelectRawValues(string $values): string|array
-    {
-        return $this->parseValues($values);
-    }
-
-    public function parseSortValues(string $values): array
-    {
-        return array_map(
-            function ($value) {
-                $trimmedValue = ltrim($value, '-');
-                $direction = str_starts_with($value, '-')
-                    ? 'desc'
-                    : 'asc';
-
-                return [
-                    'value' => $this->resolveFieldValue($trimmedValue),
-                    'direction' => $direction,
-                ];
-            },
-            $this->parseValues($values)
-        );
-    }
-
     /*
-     * Parse relations for eager loading.
+     * Resolve Parser object from provided class name.
      */
-    public function parseIncludeValues(string $values): array
+    public function getParser()
     {
-        $formattedEagerLoad = explode(':', $values);
-        $columns = [];
-
-        if (count($formattedEagerLoad) > 1) {
-            $columns = explode(',', $formattedEagerLoad[1]);
+        if (! class_exists($this->parser)) {
+            throw new RuntimeException('Defined parser for this schema does not exist!');
         }
 
-        return [$formattedEagerLoad[0] => $columns];
-    }
+        $parser = app($this->parser, [$this->attributeAliases, $this->scopeAliases]);
 
-    public function parseNestedValues(string $values): array
-    {
-        return array_map(
-            fn ($nesting) => [
-                'key' => $nesting,
-                'parts' => $this->parseNestedParts($nesting),
-            ],
-            $this->parseValues($values)
-        );
-    }
-
-    /*
-     * Resolve ordered nested logic used to properly construct desired query.
-     *
-     *
-     * Example client request => 'and,0:and:e,0:or,1:and,4:and,4:or'
-     * --------------
-     * [0:and:e] => [parent:boolean:method]
-     * 0    => index of parent nesting (determined from order in request)
-     * and  => logic of nesting: where(...) / orWhere(...)
-     * e    => nullable method of nesting. Configurable via NESTED_METHODS constant.
-     *         Default settings:
-     *         e: whereExists(...) / orWhereExists(...),
-     *         ne: whereNotExists(...) / orWhereNotExists(...),
-     */
-    public function parseNestedParts(string $values): array
-    {
-        $parts = explode(':', $values);
-        $numOfParts = count($parts);
-
-        $formattedParts = [
-            'parent' => null,
-            'boolean' => null,
-            'method' => null,
-        ];
-
-        if ($numOfParts == 1) {
-            $formattedParts['boolean'] = $parts[0];
-        } elseif ($numOfParts == 2) {
-            if (is_numeric($parts[0])) {
-                $formattedParts['parent'] = $parts[0];
-                $formattedParts['boolean'] = $parts[1];
-            } else {
-                $formattedParts['boolean'] = $parts[0];
-                $formattedParts['method'] = $parts[1];
-            }
-        } else {
-            $formattedParts = [
-                'parent' => $parts[0],
-                'boolean' => $parts[1],
-                'method' => $parts[2],
-            ];
+        if (! $parser instanceof ApiDataParser) {
+            throw new RuntimeException('Parser must be instance of MattaDavi\LaravelApiModelServer\ApiDataParser');
         }
 
-        return $formattedParts;
-    }
-
-    /*
-     * Resolve desired method to execute query.
-     * You can set possible values via $allowedMethods.
-     * Defaults to 'get()'.
-     *
-     *
-     * 1. Example request from client => 'count'
-     * --------------
-     * Method to execute => count()
-     *
-     *
-     * 2. Example request from client => 'avg:price'
-     * --------------
-     * Method to execute => avg('price')
-     */
-    public function parseQueryTypeValues(string $values): array
-    {
-        $values = $this->parseValues($values);
-
-        return [
-            'method' => $values[0],
-            'args' => array_slice($values, 1),
-        ];
-    }
-
-    public function parseFieldsValues(string $values): array
-    {
-        return array_map(
-            fn ($value) => $this->parseFieldValue($value),
-            $this->parseValues($values)
-        );
-    }
-
-    public function parseFieldValue(string $value): array
-    {
-        $formattedField = explode(' as ', $value);
-
-        return [
-            'value' => $this->resolveFieldValue($formattedField[0]),
-            'alias' => $this->resolveFieldAliasValue($formattedField),
-        ];
-    }
-
-    /*
-     * We need to take server defined aliases into consideration
-     * while resolving allowed attributes.
-     */
-    public function resolveFieldValue(string $value): string
-    {
-        return $this->attributeAliases[$value] ?? $value;
-    }
-
-    /*
-     * We need to respect client defined alias while resolving allowed attribute,
-     * even when it is resolved via server defined alias.
-     *
-     *
-     * 1. Example request from client: 'id as account'
-     * --------------
-     * Server settings: $attributeAliases = ['id' => 'iban']
-     * Value to use in query => 'iban as account'
-     *
-     *
-     * 2. Example request from client: 'id'
-     * --------------
-     * Server settings: $attributeAliases = ['id' => 'iban']
-     * Value to use in query => 'iban as id'
-     */
-    public function resolveFieldAliasValue(array $field): string
-    {
-        $alias = null;
-
-        if (isset($this->attributeAliases[$field[0]])) {
-            $alias = $field[0];
-        }
-
-        return $field[1] ?? $alias;
+        return $parser;
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use MattaDavi\LaravelApiModelServer\Rules\SortRule;
 use MattaDavi\LaravelApiModelServer\Rules\FieldsRule;
 use MattaDavi\LaravelApiModelServer\Rules\NestedRule;
+use MattaDavi\LaravelApiModelServer\Rules\FilterRule;
 use MattaDavi\LaravelApiModelServer\Rules\GroupByRule;
 use MattaDavi\LaravelApiModelServer\Rules\EagerLoadRule;
 use MattaDavi\LaravelApiModelServer\Rules\QueryTypeRule;
@@ -56,7 +57,9 @@ abstract class ApiRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //            'filter' => '',
+            'filter' => [
+                new FilterRule($this->getSchema()),
+            ],
             'sort' => [
                 new SortRule($this->getSchema()),
             ],

@@ -23,7 +23,7 @@ class SortRule extends BaseSchemaRule implements Rule
 
         $values = array_map(
             fn ($value) => $value['value'],
-            $this->schema->parseSortValues($value)
+            $this->schema->getParser()->parseSortValues($value)
         );
 
         foreach ($values as $value) {
