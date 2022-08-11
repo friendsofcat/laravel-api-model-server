@@ -1,7 +1,7 @@
 <?php
 
 namespace MattaDavi\LaravelApiModelServer;
-use Illuminate\Support\Facades\Log;
+
 class ApiDataParser
 {
     public function __construct(public array $attributeAliases = [], public array $scopeAliases = [])
@@ -324,7 +324,7 @@ class ApiDataParser
             'type' => 'Basic',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'column' => $setting[$numOfArgs - 2],
-            'operator' => $setting[$numOfArgs - 1],
+            'operator' => $this->getOperator($setting[$numOfArgs - 1]),
             'value' => $args[0],
             'boolean' => $numOfArgs > 2 ? $setting[$numOfArgs - 3] : 'and',
         ];
@@ -404,7 +404,7 @@ class ApiDataParser
             'type' => 'Date',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'column' => $setting[$numOfArgs - 3],
-            'operator' => $setting[$numOfArgs - 2],
+            'operator' => $this->getOperator($setting[$numOfArgs - 2]),
             'value' => $args[0],
             'boolean' => $numOfArgs > 3 ? $setting[$numOfArgs - 4] : 'and',
         ];
@@ -418,7 +418,7 @@ class ApiDataParser
             'type' => 'Time',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'column' => $setting[$numOfArgs - 3],
-            'operator' => $setting[$numOfArgs - 2],
+            'operator' => $this->getOperator($setting[$numOfArgs - 2]),
             'value' => $args[0],
             'boolean' => $numOfArgs > 3 ? $setting[$numOfArgs - 4] : 'and',
         ];
@@ -432,7 +432,7 @@ class ApiDataParser
             'type' => 'Year',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'column' => $setting[$numOfArgs - 3],
-            'operator' => $setting[$numOfArgs - 2],
+            'operator' => $this->getOperator($setting[$numOfArgs - 2]),
             'value' => $args[0],
             'boolean' => $numOfArgs > 3 ? $setting[$numOfArgs - 4] : 'and',
         ];
@@ -446,7 +446,7 @@ class ApiDataParser
             'type' => 'Day',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'column' => $setting[$numOfArgs - 3],
-            'operator' => $setting[$numOfArgs - 2],
+            'operator' => $this->getOperator($setting[$numOfArgs - 2]),
             'value' => $args[0],
             'boolean' => $numOfArgs > 3 ? $setting[$numOfArgs - 4] : 'and',
         ];
@@ -470,7 +470,7 @@ class ApiDataParser
             'type' => 'Column',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'first' => $args[0],
-            'operator' => $args[1],
+            'operator' => $this->getOperator($args[1]),
             'second' => $args[2],
         ];
     }

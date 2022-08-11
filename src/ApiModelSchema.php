@@ -141,6 +141,11 @@ abstract class ApiModelSchema
         return $this->attributeAliases;
     }
 
+    public function getScopeAliases(): string|array
+    {
+        return $this->attributeAliases;
+    }
+
     public function getAllowedEagerLoads(): string|array
     {
         if ($this->allowedEagerLoads === 'all') {
@@ -183,7 +188,10 @@ abstract class ApiModelSchema
             throw new RuntimeException('Defined parser for this schema does not exist!');
         }
 
-        $parser = app($this->parser, [$this->attributeAliases, $this->scopeAliases]);
+        $parser = app()->makeWith($this->parser, [
+            'attributeAliases' => $this->getAttributeAliases(),
+            'scopeAliases' => $this->getScopeAliases(),
+        ]);
 
         if (! $parser instanceof ApiDataParser) {
             throw new RuntimeException('Parser must be instance of MattaDavi\LaravelApiModelServer\ApiDataParser');

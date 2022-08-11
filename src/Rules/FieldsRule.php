@@ -21,9 +21,18 @@ class FieldsRule extends BaseSchemaRule implements Rule
             return true;
         }
 
-        $values = $this->schema->getParser()->parseFieldsValues($value);
+        $values = array_map(
+            fn ($value) => $value['value'],
+            $this->schema->getParser()->parseFieldsValues($value)
+        );
 
-        return $this->isEverythingAllowed($values, $allowedAttributes);
+        foreach ($values as $value) {
+            if (! $this->isValidValue($value, $allowedAttributes)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -34,5 +43,10 @@ class FieldsRule extends BaseSchemaRule implements Rule
     public function message()
     {
         return sprintf('Invalid select attribute: %s', $this->errorValue);
+    }
+
+    public function isValidValue($value, $allowedValues): bool
+    {
+        return in_array($value, $this->schema->getAttributeAliases()) || $this->isAllowed($value, $allowedValues);
     }
 }

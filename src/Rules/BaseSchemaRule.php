@@ -11,4 +11,18 @@ abstract class BaseSchemaRule
 
     public function __construct(public ApiModelSchema $schema)
     {}
+
+    public function getClientAliases(): array
+    {
+        $aliases = [];
+
+        if (isset($this->data) && isset($this->data['fields'])) {
+            $aliases = array_map(
+                fn ($value) => $value['alias'],
+                $this->schema->getParser()->parseFieldsValues($this->data['fields'])
+            );
+        }
+
+        return $aliases;
+    }
 }
