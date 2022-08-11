@@ -69,6 +69,8 @@ class SortRule extends BaseSchemaRule implements DataAwareRule, Rule
 
     public function isValidValue($value, $allowedValues, $clientAliases = []): bool
     {
+        $this->errorValue = $value;
+
         return isset($this->schema->getAttributeAliases()[$value])
             || in_array($value, $clientAliases)
             || $this->isAllowed($value, $allowedValues);

@@ -5,7 +5,8 @@ namespace MattaDavi\LaravelApiModelServer;
 class ApiDataParser
 {
     public function __construct(public array $attributeAliases = [], public array $scopeAliases = [])
-    {}
+    {
+    }
 
     /*
      * Operators with url safe alias
@@ -288,7 +289,7 @@ class ApiDataParser
             'type' => 'Scope',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'scope' => $setting[count($setting) - 2],
-            'args' => $args
+            'args' => $args,
         ];
     }
 
@@ -482,7 +483,8 @@ class ApiDataParser
 
     public function isWhereBasic(array $values): bool
     {
-        return ! in_array($this->getOperator($values[count($values) - 1]), self::NON_BASIC_OPERATORS);
+        return ! in_array($this->getOperator($values[count($values) - 1]), self::NON_BASIC_OPERATORS)
+            && count(explode('-', $values[count($values) - 1])) == 1;
     }
 
     public function isScope(array $values): bool

@@ -10,7 +10,8 @@ abstract class BaseSchemaRule
     use WorksWithRestrictedValues;
 
     public function __construct(public ApiModelSchema $schema)
-    {}
+    {
+    }
 
     public function getClientAliases(): array
     {
