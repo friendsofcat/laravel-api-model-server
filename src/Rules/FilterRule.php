@@ -155,13 +155,18 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
         if ($filter['type'] == 'raw') {
             $this->errorValue = 'whereRaw';
 
-            return in_array($filter['type'], $this->schema->getAllowedRawClauses());
+            return in_array('whereRaw', $this->schema->getAllowedRawClauses());
         }
 
         if (isset($filter['column']) && in_array($filter['column'], ['in_raw', 'not_in_raw'])) {
-            $this->errorValue = $filter['column'];
+            $formattedColumn = 'where' . implode('', array_map(
+                fn ($value) => ucfirst($value),
+                explode('_', $filter['column'])
+            ));
 
-            return in_array($filter['column'], $this->schema->getAllowedRawClauses());
+            $this->errorValue = $formattedColumn;
+
+            return in_array($formattedColumn, $this->schema->getAllowedRawClauses());
         }
 
         return true;

@@ -173,7 +173,7 @@ abstract class ApiModelSchema
         $model = app($this->model);
 
         if (! $model instanceof Model) {
-            throw new RuntimeException('Model must be instance of Illuminate\Database\Eloquent\Model');
+            throw new RuntimeException('Model must be an instance of Illuminate\Database\Eloquent\Model');
         }
 
         return $model;
@@ -194,7 +194,7 @@ abstract class ApiModelSchema
         ]);
 
         if (! $parser instanceof ApiDataParser) {
-            throw new RuntimeException('Parser must be instance of MattaDavi\LaravelApiModelServer\ApiDataParser');
+            throw new RuntimeException('Parser must be an instance of MattaDavi\LaravelApiModelServer\ApiDataParser');
         }
 
         return $parser;
