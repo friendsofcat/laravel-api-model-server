@@ -5,7 +5,7 @@ namespace MattaDavi\LaravelApiModelServer;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
 use MattaDavi\LaravelApiModelServer\Concerns\HasAllowedRestrictedPairs;
-
+use Illuminate\Support\Facades\Log;
 abstract class ApiModelSchema
 {
     use HasAllowedRestrictedPairs;
@@ -198,5 +198,46 @@ abstract class ApiModelSchema
         }
 
         return $parser;
+    }
+
+    public function getAllowedEagerLoadsWithTable(): array
+    {
+        $eagerLoadsWithColumns = $this->getAllowedEagerLoads();
+
+        $relationTables = $this->allowedEagerLoads != 'all'
+            ? array_map(
+                fn ($relation) => [
+                    'table' => $this->resolveRelationTable($relation),
+                    'columns' => $eagerLoadsWithColumns[$relation],
+                ],
+                array_keys($eagerLoadsWithColumns)
+            )
+            : [];
+
+        return $relationTables;
+    }
+
+    protected function resolveRelationTable($relation): string
+    {
+        $parts = explode('.', $relation);
+        $modelData = [];
+        $baseModel = $this->getModel();
+
+        foreach ($parts as $relation) {
+            if (empty($modelData) && ! method_exists($baseModel, $relation)) {
+                return '';
+            }
+
+            $related = empty($modelData)
+                ? $baseModel->$relation()->getRelated()
+                : $modelData['model']->$relation()->getRelated();
+
+            $modelData = [
+                'model' => $related,
+                'table' => $related->getTable(),
+            ];
+        }
+
+        return $modelData['table'];
     }
 }
