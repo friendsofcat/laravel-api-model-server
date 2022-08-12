@@ -362,9 +362,9 @@ class ApiDataParser
         $numOfArgs = count($setting);
 
         return [
-            'type' => 'Basic',
+            'type' => 'InRaw',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
-            'column' => 'in_raw',
+            'column' => $setting[$numOfArgs - 2],
             'value' => $args,
             'boolean' => $numOfArgs > 2 ? $setting[$numOfArgs - 3] : 'and',
         ];
@@ -375,9 +375,9 @@ class ApiDataParser
         $numOfArgs = count($setting);
 
         return [
-            'type' => 'Basic',
+            'type' => 'NotInRaw',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
-            'column' => 'not_in_raw',
+            'column' => $setting[$numOfArgs - 2],
             'value' => $args,
             'boolean' => $numOfArgs > 2 ? $setting[$numOfArgs - 3] : 'and',
         ];

@@ -90,7 +90,7 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
 
     public function hasValidColumn(array $filter, array $allowedAttributes): bool
     {
-        if (in_array($filter['type'], ['raw', 'Scope']) || in_array($filter['column'], ['in_raw', 'not_in_raw'])) {
+        if (in_array($filter['type'], ['raw', 'Scope'])) {
             return true;
         }
 
@@ -152,21 +152,13 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
             return true;
         }
 
-        if ($filter['type'] == 'raw') {
-            $this->errorValue = 'whereRaw';
+        if (in_array($filter['type'], ['raw', 'InRaw', 'NotInRaw'])) {
+            $this->errorValue = $filter['type'];
+            $formattedType = $filter['type'] == 'raw'
+                ? 'whereRaw'
+                : 'whereInteger' . $filter['type'];
 
-            return in_array('whereRaw', $this->schema->getAllowedRawClauses());
-        }
-
-        if (isset($filter['column']) && in_array($filter['column'], ['in_raw', 'not_in_raw'])) {
-            $formattedColumn = 'where' . implode('', array_map(
-                fn ($value) => ucfirst($value),
-                explode('_', $filter['column'])
-            ));
-
-            $this->errorValue = $formattedColumn;
-
-            return in_array($formattedColumn, $this->schema->getAllowedRawClauses());
+            return in_array($formattedType, $this->schema->getAllowedRawClauses());
         }
 
         return true;
