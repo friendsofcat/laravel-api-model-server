@@ -44,7 +44,7 @@ class SortRule extends BaseSchemaRule implements DataAwareRule, Rule
 
         $values = array_map(
             fn ($value) => $value['value'],
-            $this->schema->getParser()->parseSortValues($value)
+            $this->parser->parseSortValues($value)
         );
         $clientAliases = $this->getClientAliases();
 

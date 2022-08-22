@@ -15,6 +15,8 @@ use MattaDavi\LaravelApiModelServer\Rules\SelectRawRule;
 
 abstract class ApiRequest extends FormRequest
 {
+    protected $stopOnFirstFailure = true;
+
     /*
      * Full namespace of Api model schema class.
      */

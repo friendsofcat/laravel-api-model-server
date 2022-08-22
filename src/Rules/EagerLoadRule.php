@@ -21,7 +21,7 @@ class EagerLoadRule extends BaseSchemaRule implements Rule
             return true;
         }
 
-        foreach ($this->schema->getParser()->parseIncludeValues($value) as $relation => $columns) {
+        foreach ($this->parser->parseIncludeValues($value) as $relation => $columns) {
             if (! $this->isValidEagerLoad($relation, $columns, $allowedEagerLoads)) {
                 return false;
             }

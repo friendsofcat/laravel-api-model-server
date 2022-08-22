@@ -15,7 +15,7 @@ class NestedRule extends BaseSchemaRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        $nestings = $this->schema->getParser()->parseNestedValues($value);
+        $nestings = $this->parser->parseNestedValues($value);
 
         foreach ($nestings as $nesting) {
             if (! $this->isValidNesting($nesting, $nestings)) {

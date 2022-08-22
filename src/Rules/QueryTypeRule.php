@@ -16,7 +16,7 @@ class QueryTypeRule extends BaseSchemaRule implements Rule
     public function passes($attribute, $value)
     {
         $allowedMethods = $this->schema->getAllowedMethods();
-        $values = $this->schema->getParser()->parseQueryTypeValues($value);
+        $values = $this->parser->parseQueryTypeValues($value);
 
         if (! empty($values['args'])) {
             $allowedAttributes = $this->schema->getAllowedAttributes();

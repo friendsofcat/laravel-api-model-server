@@ -7,7 +7,6 @@ use Illuminate\Contracts\Validation\DataAwareRule;
 
 class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
 {
-    public $parser;
     /**
      * All of the data under validation.
      *
@@ -37,7 +36,6 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
      */
     public function passes($attribute, $value)
     {
-        $this->parser = $this->schema->getParser();
         $allowedAttributes = $this->schema->getAllowedAttributes();
         $allowedScopes = $this->schema->getAllowedScopes();
         $formattedFilters = $this->parser->parseFilterValues($value);
@@ -88,9 +86,9 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
             || ($filter['nested'] > -1 && isset($nestings[$filter['nested']]));
     }
 
-    public function hasValidColumn(array $filter, array $allowedAttributes): bool
+    public function hasValidColumn(array $filter, array|string $allowedAttributes): bool
     {
-        if (in_array($filter['type'], ['raw', 'Scope'])) {
+        if (in_array($filter['type'], ['raw', 'Scope', 'Column'])) {
             return true;
         }
 
@@ -98,7 +96,7 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
             || $this->isAllowed($this->parser->parseFieldValue($filter['column'])['value'], $allowedAttributes);
     }
 
-    public function isValidWhereColumn(array $filter, array $allowedAttributes): bool
+    public function isValidWhereColumn(array $filter, array|string $allowedAttributes): bool
     {
         if ($filter['type'] != 'Column') {
             return true;
@@ -106,27 +104,26 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
 
         $firstColumnData = explode('.', $filter['first']);
         $first = [
-            'table' => isset($firstColumnData[1]) ? null : $firstColumnData[0],
+            'table' => isset($firstColumnData[1]) ? $firstColumnData[0] : null,
             'column' => $firstColumnData[1] ?? $firstColumnData[0],
         ];
 
-        $secondColumnData = explode('.', $filter['first']);
+        $secondColumnData = explode('.', $filter['second']);
         $second = [
-            'table' => isset($secondColumnData[1]) ? null : $secondColumnData[0],
+            'table' => isset($secondColumnData[1]) ? $secondColumnData[0] : null,
             'column' => $secondColumnData[1] ?? $secondColumnData[0],
         ];
 
-        $model = $this->schema->getModel();
-
         foreach ([$first, $second] as $columnData) {
-            if ((is_null($columnData['table']) || $columnData['table'] == $model->getTable())
+            if ($this->isBaseTable($columnData['column'])
                 && ! $this->isAllowed($this->parser->parseFieldValue($columnData['column'])['value'], $allowedAttributes)) {
                 return false;
             }
 
-            if ($columnData['table'] != $model->getTable()) {
-                // todo: Handle same origin whereHas
-                return false;
+            if ($columnData['table'] != $this->model->getTable()) {
+                $tableColumn = implode('.', [$columnData['table'], $columnData['column']]);
+
+                return $this->isValidTable($tableColumn);
             }
         }
 
@@ -162,5 +159,10 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
         }
 
         return true;
+    }
+
+    public function isBaseTable(?string $table): bool
+    {
+        return is_null($table) || $table == $this->model->getTable();
     }
 }

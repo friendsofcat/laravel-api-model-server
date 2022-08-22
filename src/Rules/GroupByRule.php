@@ -42,7 +42,7 @@ class GroupByRule extends BaseSchemaRule implements DataAwareRule, Rule
             return true;
         }
 
-        $values = $this->schema->getParser()->parseGroupByValues($value);
+        $values = $this->parser->parseGroupByValues($value);
         $clientAliases = $this->getClientAliases();
 
         foreach ($values as $value) {

@@ -51,6 +51,27 @@ class ApiDataParser
 
     public const ARRAY_VALUE_SEPARATOR = ',';
 
+    public function formatData(array $data): array
+    {
+        $formattedData = [];
+
+        foreach ($data as $key => $value) {
+            $formattedData[$key] = match($key) {
+                'filter' => $this->parseFilterValues($value),
+                'sort' => $this->parseSortValues($value),
+                'nested' => $this->parseNestedValues($value),
+                'queryType' => $this->parseQueryTypeValues($value),
+                'fields' => $this->parseFieldsValues($value),
+                'include' => $this->parseIncludeValues($value),
+                'selectRaw' => $this->parseSelectRawValues($value),
+                'groupBy' => $this->parseGroupByValues($value),
+                'page', 'per_page', 'limit', 'offset' => $value,
+            };
+        }
+
+        return $formattedData;
+    }
+
     protected function getOperator(string $operator): string
     {
         return str_replace('_', ' ', array_search($operator, self::OPERATORS_WITH_ALIAS) ?: $operator);
