@@ -5,7 +5,7 @@ namespace MattaDavi\LaravelApiModelServer;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
 use MattaDavi\LaravelApiModelServer\Concerns\HasAllowedRestrictedPairs;
-use Illuminate\Support\Facades\Log;
+
 abstract class ApiModelSchema
 {
     use HasAllowedRestrictedPairs;
@@ -13,6 +13,8 @@ abstract class ApiModelSchema
     protected string $model;
 
     protected string $parser = ApiDataParser::class;
+
+    protected string $builder = ApiQueryBuilder::class;
 
     /*
      * Define what attributes would be queryable via API.
@@ -200,6 +202,26 @@ abstract class ApiModelSchema
         return $parser;
     }
 
+    /*
+     * Resolve Builder object from provided class name.
+     */
+    public function getBuilder()
+    {
+        if (! class_exists($this->builder)) {
+            throw new RuntimeException('Defined Builder for this schema does not exist!');
+        }
+
+        $builder = app()->makeWith($this->builder, [
+            'query' => $this->getModel()->newModelQuery(),
+        ]);
+
+        if (! $builder instanceof ApiQueryBuilder) {
+            throw new RuntimeException('Builder must be an instance of MattaDavi\LaravelApiModelServer\ApiQueryBuilder');
+        }
+
+        return $builder;
+    }
+
     public function getAllowedEagerLoadsWithTable(): array
     {
         $eagerLoadsWithColumns = $this->getAllowedEagerLoads();
@@ -239,5 +261,12 @@ abstract class ApiModelSchema
         }
 
         return $modelData['table'];
+    }
+
+    public function prepare(array $data): ApiQueryBuilder
+    {
+        $formattedData = $this->getParser()->formatData($data);
+
+        return $this->getBuilder()->prepare($formattedData);
     }
 }

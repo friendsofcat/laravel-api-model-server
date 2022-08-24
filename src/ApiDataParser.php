@@ -56,7 +56,7 @@ class ApiDataParser
         $formattedData = [];
 
         foreach ($data as $key => $value) {
-            $formattedData[$key] = match($key) {
+            $formattedData[$key] = match ($key) {
                 'filter' => $this->parseFilterValues($value),
                 'sort' => $this->parseSortValues($value),
                 'nested' => $this->parseNestedValues($value),

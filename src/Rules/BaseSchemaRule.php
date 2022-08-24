@@ -68,6 +68,7 @@ abstract class BaseSchemaRule
         foreach ($allowedData as $data) {
             if ($data['table'] == $table) {
                 $relation = $data;
+
                 break;
             }
         }

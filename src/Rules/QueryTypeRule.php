@@ -22,7 +22,7 @@ class QueryTypeRule extends BaseSchemaRule implements Rule
             $allowedAttributes = $this->schema->getAllowedAttributes();
 
             return $this->isAllowed($values['method'], $allowedMethods)
-                && $this->isEverythingAllowed($values['args'], $allowedAttributes);
+                && $this->areAllowedArgs($values['args'], $allowedAttributes);
         }
 
         return $this->isAllowed($values['method'], $allowedMethods);
@@ -36,5 +36,11 @@ class QueryTypeRule extends BaseSchemaRule implements Rule
     public function message()
     {
         return sprintf('Invalid queryType or queryType attribute: %s', $this->errorValue);
+    }
+
+    public function areAllowedArgs($values, $allowedAttributes): bool
+    {
+        return $this->shouldAllowEverything($allowedAttributes)
+            || $this->isEverythingAllowed($values, $allowedAttributes);
     }
 }
