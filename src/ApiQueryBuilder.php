@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ApiQueryBuilder
 {
-    public $method = [
+    public array $method = [
         'method' => 'get',
         'args' => [],
     ];
@@ -66,21 +66,6 @@ class ApiQueryBuilder
         return $result;
     }
 
-    public function isGet(): bool
-    {
-        return $this->method['method'] == 'get';
-    }
-
-    public function isExists(): bool
-    {
-        return $this->method['method'] == 'exists';
-    }
-
-    public function isAggregate(): bool
-    {
-        return ! in_array($this->method['method'], ['get', 'exists']);
-    }
-
     protected function buildWith(array $data): self
     {
         if (isset($data['includes'])) {
@@ -110,7 +95,36 @@ class ApiQueryBuilder
 
     protected function buildWhere(array $data): self
     {
-        //todo
+        foreach ($data['filter'] as $where) {
+            Log::info($where);
+            $q = $this->query;
+
+            if ($where['nested'] >= 0) {
+
+            }
+
+            match($where['type']) {
+                'Scope' => $q->{$where['scope']}(...$where['args']),
+                'Basic' => $q->where($where['column'], $where['operator'], $where['value'], $where['boolean']),
+                'In' => $q->whereIn($where['column'], $where['values'], $where['boolean']),
+                'NotIn' => $q->whereNotIn($where['column'], $where['values'], $where['boolean']),
+                'InRaw' => $q->whereIntegerInRaw($where['column'], $where['values'], $where['boolean']),
+                'NotInRaw' => $q->whereIntegerNotInRaw($where['column'], $where['values']),
+                'Null' => $q->whereNull($where['column'], $where['boolean']),
+                'NotNull' => $q->whereNotNull($where['column'], $where['boolean']),
+                'between' => $q->whereNotBetween($where['column'], $where['values'], $where['boolean']),
+                'Date' => $q->whereDate($where['column'], $where['operator'], $where['value'], $where['boolean']),
+                'Time' => $q->whereTime($where['column'], $where['operator'], $where['value'], $where['boolean']),
+                'Year' => $q->whereYear($where['column'], $where['operator'], $where['value'], $where['boolean']),
+                'Day' => $q->whereDay($where['column'], $where['operator'], $where['value'], $where['boolean']),
+                'raw' => $q->whereRaw($where['sql'], [], $where['boolean']),
+                'Column' => $q->whereColumn($where['first'], $where['operator'], $where['second'], $where['boolean']),
+                default => null
+            };
+
+            unset($where['nested']);
+            Log::info('Query where set');
+        }
 
         Log::info('Where prepared');
 
@@ -170,5 +184,20 @@ class ApiQueryBuilder
             : 'as ' . $alias;
 
         return $value . $alias;
+    }
+
+    public function isGet(): bool
+    {
+        return $this->method['method'] == 'get';
+    }
+
+    public function isExists(): bool
+    {
+        return $this->method['method'] == 'exists';
+    }
+
+    public function isAggregate(): bool
+    {
+        return ! in_array($this->method['method'], ['get', 'exists']);
     }
 }
