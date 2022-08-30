@@ -36,6 +36,14 @@ abstract class BaseSchemaRule
 
     public function isValidTable(string $value): bool
     {
+        if ($this->schema->getAllowedEagerLoads() == 'all') {
+            return true;
+        }
+
+        if (empty($this->schema->getAllowedEagerLoads())) {
+            return false;
+        }
+
         $parts = explode('.', $value);
         $table = count($parts) > 1
             ? $parts[0]
