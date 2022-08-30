@@ -126,7 +126,9 @@ abstract class ApiModelSchema
      * string[] => only specified methods (select, where, groupBy...)
      * 'all'    => every method
      */
-    protected array $allowedRawClauses = [];
+    protected array $allowedRawClauses = [
+        'whereIntegerInRaw'
+    ];
 
     public const NESTED_METHODS = [
         'e' => 'exists',
