@@ -130,7 +130,7 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
         return true;
     }
 
-    public function isValidScope(array $filter, array $allowedScopes): bool
+    public function isValidScope(array $filter, array|string $allowedScopes): bool
     {
         if ($filter['type'] != 'Scope') {
             return true;
