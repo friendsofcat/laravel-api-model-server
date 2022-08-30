@@ -95,6 +95,10 @@ class ApiQueryBuilder
 
     protected function buildWhere(array $data): self
     {
+        if (! isset($data['filter'])) {
+            return $this;
+        }
+
         foreach ($data['filter'] as $where) {
             Log::info($where);
             $q = $this->query;
