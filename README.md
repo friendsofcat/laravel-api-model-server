@@ -1,7 +1,7 @@
 # laravel-api-model-server
 Easy to implement configurable API solution for Eloquent Models.
 
-Goes hand in hand with [Laravel API model package.](https://github.com/matta-davi/laravel-api-model)
+Goes hand in hand with [Laravel API model package.](https://github.com/friendsofcat/laravel-api-model)
 <br></br>
 ## Features:
 
