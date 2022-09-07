@@ -31,9 +31,7 @@ class ApiQueryBuilder
 
     public function prepare(array $data): self
     {
-        Log::info('Preparing query');
         $this->prepareMethod($data);
-        Log::info('Method prepared');
 
         return $this
             ->buildWith($data)
@@ -46,9 +44,6 @@ class ApiQueryBuilder
 
     public function execute(bool $withoutAppends = true)
     {
-        Log::info('Executing query');
-        Log::info($this->method['method']);
-        Log::info($this->method['args']);
         $result = $this->query->{$this->method['method']}(...$this->method['args']);
 
         if ($withoutAppends && $this->isGet()) {
@@ -71,7 +66,6 @@ class ApiQueryBuilder
         if (isset($data['includes'])) {
             $this->query->with($data['includes']);
         }
-        Log::info('With prepared');
 
         return $this;
     }
@@ -88,11 +82,11 @@ class ApiQueryBuilder
         );
 
         $this->query->select($formattedFields);
-        Log::info('Select prepared');
 
         return $this;
     }
 
+    // todo: handle nested logic. Current workaround is to use externalScopes
     protected function buildWhere(array $data): self
     {
         if (! isset($data['filter'])) {
@@ -100,7 +94,6 @@ class ApiQueryBuilder
         }
 
         foreach ($data['filter'] as $where) {
-            Log::info($where);
             $q = $this->query;
 
             if ($where['nested'] >= 0) {
@@ -127,10 +120,7 @@ class ApiQueryBuilder
             };
 
             unset($where['nested']);
-            Log::info('Query where set');
         }
-
-        Log::info('Where prepared');
 
         return $this;
     }
@@ -145,8 +135,6 @@ class ApiQueryBuilder
             $this->query->orderBy($sort['value'], $sort['direction']);
         }
 
-        Log::info('Order prepared');
-
         return $this;
     }
 
@@ -159,7 +147,6 @@ class ApiQueryBuilder
         if (isset($data['offset'])) {
             $this->query->offset($data['offset']);
         }
-        Log::info('Limit prepared');
 
         return $this;
     }
@@ -169,7 +156,6 @@ class ApiQueryBuilder
         if (isset($data['groupBy'])) {
             $this->query->groupBy($data['groupBy']);
         }
-        Log::info('Groupby prepared');
 
         return $this;
     }
@@ -202,6 +188,6 @@ class ApiQueryBuilder
 
     public function isAggregate(): bool
     {
-        return ! in_array($this->method['method'], ['get', 'exists']);
+        return ! in_array($this->method['method'], ['get', 'exists', 'delete']);
     }
 }
