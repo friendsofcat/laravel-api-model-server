@@ -1,6 +1,6 @@
 <?php
 
-namespace MattaDavi\LaravelApiModelServer\Concerns;
+namespace FriendsOfCat\LaravelApiModelServer\Concerns;
 
 trait WorksWithRestrictedValues
 {

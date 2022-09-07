@@ -1,10 +1,10 @@
 <?php
 
-namespace MattaDavi\LaravelApiModelServer;
+namespace FriendsOfCat\LaravelApiModelServer;
 
 use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
-use MattaDavi\LaravelApiModelServer\Concerns\HasAllowedRestrictedPairs;
+use FriendsOfCat\LaravelApiModelServer\Concerns\HasAllowedRestrictedPairs;
 
 abstract class ApiModelSchema
 {
@@ -198,7 +198,7 @@ abstract class ApiModelSchema
         ]);
 
         if (! $parser instanceof ApiDataParser) {
-            throw new RuntimeException('Parser must be an instance of MattaDavi\LaravelApiModelServer\ApiDataParser');
+            throw new RuntimeException('Parser must be an instance of FriendsOfCat\LaravelApiModelServer\ApiDataParser');
         }
 
         return $parser;
@@ -218,7 +218,7 @@ abstract class ApiModelSchema
         ]);
 
         if (! $builder instanceof ApiQueryBuilder) {
-            throw new RuntimeException('Builder must be an instance of MattaDavi\LaravelApiModelServer\ApiQueryBuilder');
+            throw new RuntimeException('Builder must be an instance of FriendsOfCat\LaravelApiModelServer\ApiQueryBuilder');
         }
 
         return $builder;

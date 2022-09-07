@@ -1,6 +1,6 @@
 <?php
 
-namespace MattaDavi\LaravelApiModelServer\Rules;
+namespace FriendsOfCat\LaravelApiModelServer\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
