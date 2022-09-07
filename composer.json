@@ -1,5 +1,5 @@
 {
-    "name": "matta-davi/laravel-api-model-server",
+    "name": "friendsofcat/laravel-api-model-server",
     "description": "API for Laravel Eloquent",
     "keywords": [
         "laravel",
@@ -15,15 +15,9 @@
         "illuminate/contracts": "^7.0 || ^8.0 || ^9.0"
     },
     "license": "MIT",
-    "authors": [
-        {
-            "name": "David Matta",
-            "email": "matta.davi@gmail.com"
-        }
-    ],
     "autoload": {
         "psr-4": {
-            "MattaDavi\\LaravelApiModelServer\\": "src"
+            "FriendsOfCat\\LaravelApiModelServer\\": "src"
         }
     },
     "minimum-stability": "dev",

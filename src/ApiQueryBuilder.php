@@ -1,8 +1,7 @@
 <?php
 
-namespace MattaDavi\LaravelApiModelServer;
+namespace FriendsOfCat\LaravelApiModelServer;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
 
 class ApiQueryBuilder

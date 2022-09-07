@@ -1,6 +1,6 @@
 <?php
 
-namespace MattaDavi\LaravelApiModelServer;
+namespace FriendsOfCat\LaravelApiModelServer;
 
 class ApiDataParser
 {

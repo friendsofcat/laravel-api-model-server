@@ -1,17 +1,17 @@
 <?php
 
-namespace MattaDavi\LaravelApiModelServer;
+namespace FriendsOfCat\LaravelApiModelServer;
 
 use RuntimeException;
 use Illuminate\Foundation\Http\FormRequest;
-use MattaDavi\LaravelApiModelServer\Rules\SortRule;
-use MattaDavi\LaravelApiModelServer\Rules\FieldsRule;
-use MattaDavi\LaravelApiModelServer\Rules\FilterRule;
-use MattaDavi\LaravelApiModelServer\Rules\NestedRule;
-use MattaDavi\LaravelApiModelServer\Rules\GroupByRule;
-use MattaDavi\LaravelApiModelServer\Rules\EagerLoadRule;
-use MattaDavi\LaravelApiModelServer\Rules\QueryTypeRule;
-use MattaDavi\LaravelApiModelServer\Rules\SelectRawRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\SortRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\FieldsRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\FilterRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\NestedRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\GroupByRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\EagerLoadRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\QueryTypeRule;
+use FriendsOfCat\LaravelApiModelServer\Rules\SelectRawRule;
 
 abstract class ApiRequest extends FormRequest
 {
@@ -45,7 +45,7 @@ abstract class ApiRequest extends FormRequest
         $schema = app($this->schema);
 
         if (! $schema instanceof ApiModelSchema) {
-            throw new RuntimeException('Schema must be instance of MattaDavi\LaravelApiModelServer\ApiModelSchema');
+            throw new RuntimeException('Schema must be instance of FriendsOfCat\LaravelApiModelServer\ApiModelSchema');
         }
 
         $this->schemaObject = $schema;

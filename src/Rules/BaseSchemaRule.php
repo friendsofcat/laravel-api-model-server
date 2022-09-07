@@ -1,11 +1,11 @@
 <?php
 
-namespace MattaDavi\LaravelApiModelServer\Rules;
+namespace FriendsOfCat\LaravelApiModelServer\Rules;
 
 use Illuminate\Database\Eloquent\Model;
-use MattaDavi\LaravelApiModelServer\ApiDataParser;
-use MattaDavi\LaravelApiModelServer\ApiModelSchema;
-use MattaDavi\LaravelApiModelServer\Concerns\WorksWithRestrictedValues;
+use FriendsOfCat\LaravelApiModelServer\ApiDataParser;
+use FriendsOfCat\LaravelApiModelServer\ApiModelSchema;
+use FriendsOfCat\LaravelApiModelServer\Concerns\WorksWithRestrictedValues;
 
 abstract class BaseSchemaRule
 {
