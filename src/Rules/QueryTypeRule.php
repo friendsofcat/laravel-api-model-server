@@ -3,9 +3,15 @@
 namespace FriendsOfCat\LaravelApiModelServer\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
+use FriendsOfCat\LaravelApiModelServer\ApiModelSchema;
 
 class QueryTypeRule extends BaseSchemaRule implements Rule
 {
+    public function __construct(public ApiModelSchema $schema, public $requestMethod)
+    {
+        $this->model = $schema->getModel();
+        $this->parser = $schema->getParser();
+    }
     /**
      * Determine if the validation rule passes.
      *
@@ -25,7 +31,7 @@ class QueryTypeRule extends BaseSchemaRule implements Rule
                 && $this->areAllowedArgs($values['args'], $allowedAttributes);
         }
 
-        return $this->isAllowed($values['method'], $allowedMethods);
+        return $this->isAllowed($values['method'], $allowedMethods) && $this->isAllowedRequestType($values['method']);
     }
 
     /**
@@ -35,12 +41,19 @@ class QueryTypeRule extends BaseSchemaRule implements Rule
      */
     public function message()
     {
-        return sprintf('Invalid queryType or queryType attribute: %s', $this->errorValue);
+        return sprintf('Invalid queryType or queryType attribute. %s', $this->errorValue);
     }
 
     public function areAllowedArgs($values, $allowedAttributes): bool
     {
         return $this->shouldAllowEverything($allowedAttributes)
             || $this->isEverythingAllowed($values, $allowedAttributes);
+    }
+
+    public function isAllowedRequestType($method)
+    {
+        $this->errorValue = 'Unsupported request type for this action: ' . $this->requestMethod;
+
+        return in_array($method, $this->schema->allowedRequestTypeMethod[$this->requestMethod]);
     }
 }

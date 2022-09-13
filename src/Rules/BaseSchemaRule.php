@@ -24,10 +24,10 @@ abstract class BaseSchemaRule
     {
         $aliases = [];
 
-        if (isset($this->data) && isset($this->data['fields'])) {
+        if (isset($this->data) && (isset($this->data['fields']) || isset($this->data['params']['fields']))) {
             $aliases = array_map(
                 fn ($value) => $value['alias'],
-                $this->parser->parseFieldsValues($this->data['fields'])
+                $this->parser->parseFieldsValues(data_get($this->data, 'fields', $this->data['params']['fields']))
             );
         }
 

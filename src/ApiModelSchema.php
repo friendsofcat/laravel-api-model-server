@@ -127,12 +127,36 @@ abstract class ApiModelSchema
      * 'all'    => every method
      */
     protected array $allowedRawClauses = [
-        'whereIntegerInRaw'
+        'whereIntegerInRaw',
     ];
 
     public const NESTED_METHODS = [
         'e' => 'exists',
         'ne' => 'notExists',
+    ];
+
+    /*
+     * Define what methods are allowed for different request types.
+     */
+    public array $allowedRequestTypeMethod = [
+        'GET' => [
+            'get',
+            'exists',
+            'count',
+            'avg',
+            'min',
+            'max',
+            'sum',
+        ],
+        'POST' => [
+            'insert',
+        ],
+        'DELETE' => [
+            'delete',
+        ],
+        'PUT' => [
+            'update',
+        ],
     ];
 
     public function getAllowedRawClauses(): string|array
@@ -177,7 +201,7 @@ abstract class ApiModelSchema
         $model = app($this->model);
 
         if (! $model instanceof Model) {
-            throw new RuntimeException('Model must be an instance of Illuminate\Database\Eloquent\Model');
+            throw new RuntimeException('Model must be an instance of ' . Model::class);
         }
 
         return $model;
@@ -198,7 +222,7 @@ abstract class ApiModelSchema
         ]);
 
         if (! $parser instanceof ApiDataParser) {
-            throw new RuntimeException('Parser must be an instance of FriendsOfCat\LaravelApiModelServer\ApiDataParser');
+            throw new RuntimeException('Parser must be an instance of ' . ApiDataParser::class);
         }
 
         return $parser;
@@ -218,7 +242,7 @@ abstract class ApiModelSchema
         ]);
 
         if (! $builder instanceof ApiQueryBuilder) {
-            throw new RuntimeException('Builder must be an instance of FriendsOfCat\LaravelApiModelServer\ApiQueryBuilder');
+            throw new RuntimeException('Builder must be an instance of ' . ApiQueryBuilder::class);
         }
 
         return $builder;

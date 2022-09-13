@@ -45,7 +45,7 @@ abstract class ApiRequest extends FormRequest
         $schema = app($this->schema);
 
         if (! $schema instanceof ApiModelSchema) {
-            throw new RuntimeException('Schema must be instance of FriendsOfCat\LaravelApiModelServer\ApiModelSchema');
+            throw new RuntimeException('Schema must be instance of ' . ApiModelSchema::class);
         }
 
         $this->schemaObject = $schema;
@@ -71,7 +71,7 @@ abstract class ApiRequest extends FormRequest
                 new NestedRule($this->getSchema()),
             ],
             'queryType' => [
-                new QueryTypeRule($this->getSchema()),
+                new QueryTypeRule($this->getSchema(), $this->method()),
             ],
             'fields' => [
                 new FieldsRule($this->getSchema()),

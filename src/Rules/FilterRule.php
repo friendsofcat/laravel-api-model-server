@@ -39,9 +39,12 @@ class FilterRule extends BaseSchemaRule implements DataAwareRule, Rule
         $allowedAttributes = $this->schema->getAllowedAttributes();
         $allowedScopes = $this->schema->getAllowedScopes();
         $formattedFilters = $this->parser->parseFilterValues($value);
-        $formattedNestings = isset($this->data['nested'])
-            ? $this->parser->parseNestedValues($this->data['nested'])
-            : [];
+        $formattedNestings = [];
+
+        if (isset($this->data['nested']) || isset($this->data['params']['nested'])) {
+            $nestings = data_get($this->data, 'nested', $this->data['params']['nested']);
+            $formattedNestings = $this->parser->parseNestedValues($nestings);
+        }
 
         foreach ($formattedFilters as $key => $filter) {
             if (! $this->isValidType($filter)) {

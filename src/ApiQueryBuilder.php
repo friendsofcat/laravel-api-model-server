@@ -96,10 +96,9 @@ class ApiQueryBuilder
             $q = $this->query;
 
             if ($where['nested'] >= 0) {
-
             }
 
-            match($where['type']) {
+            match ($where['type']) {
                 'Scope' => $q->{$where['scope']}(...$where['args']),
                 'Basic' => $q->where($where['column'], $where['operator'], $where['value'], $where['boolean']),
                 'In' => $q->whereIn($where['column'], $where['values'], $where['boolean']),
