@@ -186,6 +186,6 @@ class ApiQueryBuilder
 
     public function isAggregate(): bool
     {
-        return ! in_array($this->method['method'], ['get', 'exists', 'delete']);
+        return in_array($this->method['method'], ['sum', 'count', 'avg', 'min', 'max']);
     }
 }
