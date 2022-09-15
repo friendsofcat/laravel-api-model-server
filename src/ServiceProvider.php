@@ -1,6 +1,6 @@
 <?php
 
-namespace FriendsOfCat\LaravelApiModel;
+namespace FriendsOfCat\LaravelApiModelServer;
 
 use Illuminate\Routing\Router;
 use Illuminate\Events\Dispatcher;
