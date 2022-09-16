@@ -169,7 +169,7 @@ class ApiQueryBuilder
     {
         $alias = is_null($alias)
             ? ''
-            : 'as ' . $alias;
+            : ' as ' . $alias;
 
         return $value . $alias;
     }
