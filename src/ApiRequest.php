@@ -114,6 +114,10 @@ abstract class ApiRequest extends FormRequest
 
     protected function shouldOverwriteFields(): bool
     {
+        if ($this->getSchema()->getAllowedAttributes() == 'all') {
+            return false;
+        }
+
         if (! isset($this->fields) && $this->getSchema()->getAllowedAttributes() != 'all') {
             return true;
         }
