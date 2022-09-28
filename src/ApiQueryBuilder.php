@@ -62,8 +62,8 @@ class ApiQueryBuilder
 
     protected function buildWith(array $data): self
     {
-        if (isset($data['includes'])) {
-            $this->query->with($data['includes']);
+        if (isset($data['include'])) {
+            $this->query->with($data['include']);
         }
 
         return $this;
