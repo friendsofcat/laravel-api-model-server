@@ -63,7 +63,17 @@ class ApiQueryBuilder
     protected function buildWith(array $data): self
     {
         if (isset($data['include'])) {
-            $this->query->with($data['include']);
+            $with = [];
+
+            foreach ($data['include'] as $relation) {
+                $columns = sizeof($relation['columns'])
+                    ? sprintf(':%s', implode(',', $relation['columns']))
+                    : '';
+
+                $with[] = $relation['relation'] . $columns;
+            }
+
+            $this->query->with($with);
         }
 
         return $this;

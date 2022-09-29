@@ -21,8 +21,8 @@ class EagerLoadRule extends BaseSchemaRule implements Rule
             return true;
         }
 
-        foreach ($this->parser->parseIncludeValues($value) as $relation => $columns) {
-            if (! $this->isValidEagerLoad($relation, $columns, $allowedEagerLoads)) {
+        foreach ($this->parser->parseIncludeValues($value) as $relation) {
+            if (! $this->isValidEagerLoad($relation['relation'], $relation['columns'], $allowedEagerLoads)) {
                 return false;
             }
         }
@@ -47,7 +47,7 @@ class EagerLoadRule extends BaseSchemaRule implements Rule
 
     protected function isValidRelation($value, $allowedValues): bool
     {
-        return isset($allowedValues[$value]);
+        return (bool) sizeof($this->getRelationByName($value, $allowedValues));
     }
 
     protected function isUsingValidColumns($relation, $columns, $allowedValues): bool
@@ -56,16 +56,29 @@ class EagerLoadRule extends BaseSchemaRule implements Rule
             return false;
         }
 
-        if (empty($allowedValues[$relation])) {
+        $relation = $this->getRelationByName($relation, $allowedValues);
+
+        if (empty($relation['columns'])) {
             return true;
         }
 
         foreach ($columns as $column) {
-            if (! in_array($column, $allowedValues[$relation])) {
+            if (! in_array($column, $relation['columns'])) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    protected function getRelationByName($relation, $values)
+    {
+        foreach ($values as $value) {
+            if ($value['relation'] == $relation) {
+                return $value;
+            }
+        }
+
+        return [];
     }
 }

@@ -183,7 +183,7 @@ abstract class ApiModelSchema
         $formattedEagerLoads = [];
 
         foreach ($this->allowedEagerLoads as $eagerLoad) {
-            $formattedEagerLoads = array_merge($formattedEagerLoads, $this->getParser()->parseIncludeValues($eagerLoad));
+            $formattedEagerLoads[] = $this->getParser()->parseIncludeValues($eagerLoad, true);
         }
 
         return $formattedEagerLoads;

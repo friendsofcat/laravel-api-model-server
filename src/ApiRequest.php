@@ -105,6 +105,12 @@ abstract class ApiRequest extends FormRequest
                 'fields' => $this->setDefaultFields(),
             ]);
         }
+
+        if (isset($this->include)) {
+            $this->merge([
+                'include' => $this->prepareInclude(),
+            ]);
+        }
     }
 
     protected function failedValidation(Validator $validator)
@@ -169,5 +175,53 @@ abstract class ApiRequest extends FormRequest
         }
 
         return implode($this->getSchema()->getParser()::ARRAY_VALUE_SEPARATOR, $fields);
+    }
+
+    /*
+     * When we allow only specific columns to be eager loaded for a relation,
+     * we want API client to be able to request relation without any explicit set of columns
+     * and reformat the request on our end.
+     */
+    protected function prepareInclude()
+    {
+        $allowedEagerLoads = $this->getSchema()->getAllowedEagerLoads();
+
+        if ($allowedEagerLoads == 'all') {
+            return $this->include;
+        }
+
+        $formattedInclude = $this->getSchema()->getParser()->parseIncludeValues($this->include);
+
+        $formattedInclude = array_map(
+            function ($include) use ($allowedEagerLoads) {
+                $allowedInclude = null;
+
+                foreach ($allowedEagerLoads as $allowedEagerLoad) {
+                    if ($allowedEagerLoad['relation'] == $include['relation']) {
+                        $allowedInclude = $allowedEagerLoad;
+
+                        break;
+                    }
+                }
+
+                if (empty($include['columns']) && ! is_null($allowedInclude) && ! empty($allowedInclude['columns'])) {
+                    $include['columns'] = $allowedInclude['columns'];
+                }
+
+                return $include;
+            },
+            $formattedInclude
+        );
+
+        // Format data back to what is expected by server
+        return implode(
+            $this->getSchema()->getParser()::ARRAY_VALUE_SEPARATOR,
+            array_map(
+                fn ($include) => empty($include['columns'])
+                    ? $include['relation']
+                    : $include['relation'] . ':' . implode(':', $include['columns']),
+                $formattedInclude
+            )
+        );
     }
 }

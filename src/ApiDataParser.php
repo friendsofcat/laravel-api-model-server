@@ -120,16 +120,36 @@ class ApiDataParser
     /*
      * Parse relations for eager loading.
      */
-    public function parseIncludeValues(string $values): array
+    public function parseIncludeValues(string $values, $useDefaultFormat = false): array
     {
-        $formattedEagerLoad = explode(':', $values);
-        $columns = [];
+        if ($useDefaultFormat) {
+            $formattedEagerLoad = explode(':', $values);
+            $columns = [];
 
-        if (count($formattedEagerLoad) > 1) {
-            $columns = explode(',', $formattedEagerLoad[1]);
+            if (sizeof($formattedEagerLoad) > 1) {
+                $columns = explode(',', $formattedEagerLoad[1]);
+            }
+
+            return [
+                'relation' => $formattedEagerLoad[0],
+                'columns' => $columns,
+            ];
+        } else {
+            $formattedEagerLoad = $this->parseValues($values);
+            $result = [];
+
+            foreach ($formattedEagerLoad as $value) {
+                $columns = explode(':', $value);
+                $relation = array_shift($columns);
+
+                $result[] = [
+                    'relation' => $relation,
+                    'columns' => $columns ?? [],
+                ];
+            }
         }
 
-        return [$formattedEagerLoad[0] => $columns];
+        return $result;
     }
 
     public function parseNestedValues(string $values): array
