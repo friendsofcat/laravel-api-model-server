@@ -378,7 +378,7 @@ class ApiDataParser
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'column' => $setting[$numOfArgs - 2],
             'operator' => $this->getOperator($setting[$numOfArgs - 1]),
-            'value' => $args[0],
+            'value' => implode(self::ARRAY_VALUE_SEPARATOR, $args),
             'boolean' => $numOfArgs > 2 ? $setting[$numOfArgs - 3] : 'and',
         ];
     }
@@ -458,7 +458,7 @@ class ApiDataParser
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'column' => $setting[$numOfArgs - 3],
             'operator' => $this->getOperator($setting[$numOfArgs - 2]),
-            'value' => $args[0],
+            'value' => implode(self::ARRAY_VALUE_SEPARATOR, $args),
             'boolean' => $numOfArgs > 3 ? $setting[$numOfArgs - 4] : 'and',
         ];
     }
@@ -512,7 +512,7 @@ class ApiDataParser
         return [
             'type' => 'raw',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
-            'sql' => $args[0],
+            'sql' => implode(self::ARRAY_VALUE_SEPARATOR, $args),
             'boolean' => $numOfArgs > 2 ? $setting[$numOfArgs - 3] : 'and',
         ];
     }
