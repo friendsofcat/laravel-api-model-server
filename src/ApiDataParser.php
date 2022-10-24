@@ -326,11 +326,22 @@ class ApiDataParser
 
     public function parseScope(array $setting, array $args)
     {
+        // Support multiple args for scopes.
+        // Note that multidimensional arrays are not supported.
+        $formattedArgs = array_map(
+            function ($item) {
+                $values = explode(':', $item);
+
+                return count($values) > 1 ? $values : $values[0];
+            },
+            $args
+        );
+
         return [
             'type' => 'Scope',
             'nested' => is_numeric($setting[0]) ? $setting[0] : -1,
             'scope' => $setting[count($setting) - 2],
-            'args' => $args,
+            'args' => $formattedArgs,
         ];
     }
 
